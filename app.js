@@ -1,13 +1,17 @@
 /** BizTime express application. */
-
-
 const express = require("express");
-
 const app = express();
 const ExpressError = require("./expressError")
+const companyRoutes = require('./routes/companies');
 
 app.use(express.json());
 
+app.use((req, res, next) => {
+  console.log(`Request Method: ${req.method}, Request Path: ${req.path}`);
+  next();
+});
+
+app.use('/companies', companyRoutes);
 
 /** 404 handler */
 
