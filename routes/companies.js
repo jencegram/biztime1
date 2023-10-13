@@ -17,17 +17,21 @@ router.get('/', async (req, res, next) => {
 });
 
 router.get('/:code', async (req, res, next) => {
-  try {
-      const { code } = req.params;
-      const result = await db.query('SELECT * FROM companies WHERE code=$1', [code]);
-      if (result.rows.length === 0) {
-          return res.status(404).json({error: 'Company not found'});
-      }
-      return res.json({company: result.rows[0]});
-  } catch(e) {
-      return next(e);
-  }
+    try {
+        const { code } = req.params;
+        const companyRes = await db.query('SELECT code, name, description FROM companies WHERE code = $1', [code]);
+        const invoicesRes = await db.query('SELECT id FROM invoices WHERE comp_code = $1', [code]);
+        if (companyRes.rows.length === 0) {
+            return res.status(404).json({error: 'Company not found'});
+        }
+        const company = companyRes.rows[0];
+        company.invoices = invoicesRes.rows.map(inv => inv.id);
+        return res.json({company: company});
+    } catch (e) {
+        return next(e);
+    }
 });
+
 
 router.post('/', async (req, res, next) => {
   try {
